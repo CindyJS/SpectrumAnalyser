@@ -1,0 +1,390 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Speach Test</title>
+        <script type="text/javascript" src="build/js/Cindy.js"></script>
+
+</script>
+
+<script id="csmousedown" type="text/x-cindyscript">
+  if(!running,
+   javascript("startaudio()");
+   running=true;
+  );
+  if(|mouse().xy,poslin|<.5,lin=true);
+  if(|mouse().xy,poslog|<.5,lin=false);
+  if(|mouse().xy,(-2,-.5)|<.5,advance=!advance);
+  if(|mouse().xy,posc1|<.5,selco=1);
+  if(|mouse().xy,posc2|<.5,selco=2);
+  if(|mouse().xy,posc3|<.5,selco=3);
+
+
+
+</script>
+
+<script id="csdraw" type="text/x-cindyscript">
+
+if(selco==1,col(v):=(v,v^2,v^3));
+if(selco==2,col(v):=(v^2,v^3,v));
+if(selco==3,col(v):=hue(v+.7)*(v*.7+.3)+(1,1,1)*v^2);
+
+draw((12,0),(12,7),color->(1,1,1)*.5);
+A.x=12;
+B.x=12;
+if(mover()==A,
+  B.y=min(7,max(B.y,A.y+1));
+  A.y=min(B.y-1,max(lowestpos,A.y));
+);
+if(mover()==B,
+  B.y=min(7,max(B.y,1+lowestpos));
+  A.y=min(B.y-1,max(lowestpos,A.y));
+  B.y=min(7,max(B.y,A.y+1));
+);
+C.y=-.5;
+C.x=min(10,max(7,C.x));
+scal=(C.x-7)/3;
+draw((7,-.5),(10,-.5),color->(1,1,1)*.5,size->2);
+minf=A.y/7/2;
+maxf=B.y/7/2;
+minhz=minf*22000;
+maxhz=maxf*22000;
+logfact=(maxhz/minhz);
+logmin=log(minhz);
+logmax=log(maxhz);
+//0-->0Hz 1-->22000Hz
+
+
+if(lin,
+  f(x):=round(((x/2048)*(maxf-minf)+minf)*2048);
+);
+if(!lin,
+   f(x):=round(exp((x/2048)*(logmax-logmin)+logmin)/22000*2048);
+);
+
+
+apply(0..11,
+  drawtext((12.2,#/11*7-.05),#*1000+"Hz",color->(1,1,1)*.5,size->15);
+
+);
+
+
+    if(!running,
+   javascript("startaudio()");
+   running=true;
+  );
+
+fact=3;
+  nn=512;
+sample=apply(1..nn,
+  (g((arr_(f(2048*#/nn))/255))+
+  g((arr_(f(2048*(#+1)/nn))/255))+
+  g((arr_(f(2048*(#+2)/nn))/255))+
+  g((arr_(f(2048*(#+3)/nn))/255))+
+  g((arr_(f(2048*(#+4)/nn))/255)))/5*scal*2;
+);
+sample1=apply(1..nn,
+  g((arr_(f(2048*#/nn))/255*scal*2))
+);
+
+
+fillpolygon(
+[[7,0],[7+3,0],[7+3,7],[7,7]],color->(0,0,0)
+);
+
+bound=.3;
+//Spectrum
+
+maxs=maxs*.95;
+
+apply(1..nn,
+   maxs_#=max(maxs_#,sample_#);
+);
+
+
+if(running,
+apply(1..nn,
+   x=#/nn;
+   v=sample_#;
+   draw((7,x*7),(7+v*fact,x*7),size->1,color->col(v)*.7+.3*(1,1,1));
+);
+
+canvas((0,0),(10,0),"img",
+   sh=if(advance,.05,0);
+   drawimage((0,0+sh),(10,0+sh),"img");
+   apply(1..nn,
+     x=#/nn*10;
+     v=sample1_#;
+     fillcircle((x,0),.05,color->col(v));
+   );
+);
+drawimage((7,0),(7,7),"img");
+);
+apply(1..(nn-1),
+   x=#/nn*7;
+   y=maxs_#*fact+7;
+   x1=(#+1)/nn*7;
+   y1=maxs_(#+1)*fact+7;
+   draw((y,x),(y1,x1));
+);
+
+drawtext(poslin+(0,-.1),"linear",align->"center",color->(1,1,1)*if(lin,1,.5),size->16);
+drawtext(poslog+(0,-.1),"log",align->"center",color->(1,1,1)*if(!lin,1,.5),size->16);
+
+drawtext((7,7.6),"range "+round(minf*2200)*10+"Hz to "+round(maxf*2200)*10+"Hz",color->(1,1,1));
+
+
+
+if(lin,
+
+if(maxhz-minhz<6000,
+al=(1/((maxhz-minhz)/6000)-1)*3;
+  ff(x):=((x*100)-minhz)/(maxhz-minhz);
+  trigmin=ceil(minhz/100);
+  trigmax=floor(maxhz/100);
+  apply(trigmin..trigmax,
+    draw((10,ff(#)*7),(12,#*7/110),color->(1,1,1)*.3,alpha->al);
+
+  );
+);
+
+
+
+ff(x):=((x*1000)-minhz)/(maxhz-minhz);
+trigmin=ceil(minhz/1000);
+trigmax=floor(maxhz/1000);
+apply(trigmin..trigmax,
+draw((10,ff(#)*7),(12,#*7/11),color->(1,1,1)*.7);
+
+);
+);
+
+if(!lin,
+
+
+gg(x):=(log(x)-logmin)/(logmax-logmin);
+  ff(x):=((x*100)-minhz)/(maxhz-minhz);
+  trigmin=ceil(minhz/100);
+  trigmax=floor(maxhz/100);
+  apply(trigmin..trigmax,
+    val=gg(#*100);
+    vale=gg((#+1)*100);
+    al=(vale-val)*100;
+    draw((10,val*7),(12,#*7/110),color->(1,1,1)*.3,alpha->al);
+
+);
+
+
+
+ff(x):=((x*1000)-minhz)/(maxhz-minhz);
+trigmin=ceil(minhz/1000);
+trigmax=floor(maxhz/1000);
+apply(trigmin..trigmax,
+draw((10,gg(#*1000)*7),(12,#*7/11),color->(1,1,1)*.7);
+
+);
+
+
+
+);
+
+
+draw((10,7),(12,B.y),color->(1,1,1));
+draw((10,0),(12,A.y),color->(1,1,1));
+draw(A,B,color->(1,1,1),size->2);
+
+drawimage((-2,-.5)+(-.3,-.3),(-2,-.5)+(+.3,-.3),if(advance,"pause","play"));
+
+drawimage(posc1+(-.3,-.3),posc1+(+.3,-.3),if(advance,"col1","play"),alpha->if(selco==1,1,.6));
+drawimage(posc2+(-.3,-.3),posc2+(+.3,-.3),if(advance,"col2","play"),alpha->if(selco==2,1,.6));
+drawimage(posc3+(-.3,-.3),posc3+(+.3,-.3),if(advance,"col3","play"),alpha->if(selco==3,1,.6));
+drawpoly([posc1+(-.3,-.3),posc1+(+.3,-.3),posc1+(.3,.3),posc1+(-.3,.3)],color->(1,1,1),size->1,alpha->if(selco==1,1,.4));
+drawpoly([posc2+(-.3,-.3),posc2+(+.3,-.3),posc2+(.3,.3),posc2+(-.3,.3)],color->(1,1,1),size->1,alpha->if(selco==2,1,.4));
+drawpoly([posc3+(-.3,-.3),posc3+(+.3,-.3),posc3+(.3,.3),posc3+(-.3,.3)],color->(1,1,1),size->1,alpha->if(selco==3,1,.4));
+
+</script>
+
+
+<script id="csinit" type="text/x-cindyscript">
+  advance=true;
+  poslog=(11.5,-.5);
+  poslin=(10.5,-.5);
+  posc1=(-2,7.5);
+  posc2=(-1,7.5);
+  posc3=(0,7.5);
+selco=1;
+
+  lin=true;
+  lowest=20;
+
+lowestpos=lowest/11000*7;
+
+  A.xy=(12,lowestpos);
+  B.xy=(12,7);
+createimage("img",1000,1000/7*10);
+running=false;
+arr=zerovector(2048);;
+maxs=zerovector(2048);;
+cur=zerovector(2047);;
+if(lin,
+  f(x):=round(((x/2048)*(maxf-minf)+minf)*2048);
+);
+if(!lin,
+   f(x):=round(exp(x/600+3));
+);
+;
+g(x):=x;
+//col(v):=(v,v^2,v^3);
+col(v):=(v^2,v^3,v);
+//col(v):=hue(v+.7)*(v*.7+.3)+(1,1,1)*v^2;
+</script>
+<script type="text/javascript">
+//window.localStorage.clear();
+var cdy = CindyJS({ // See ref/createCindy documentation for details.
+  ports: [{id: "CSCanvas", width: 1250, height:700 ,
+      background: "rgb(30,30,30)",
+
+  transform: [{visibleRect: [-3, -1, 14, 8]}]}],
+
+  scripts: "cs*",
+ 
+  animation: {autoplay: true},
+  defaultAppearance: {
+    // See GeoBasics.js for possible attributes.
+  },
+ images: {
+      stop:"Stop.png",
+      play:"Play.png",
+      pause:"Pause.png",
+      col1:"Col1.png",
+      col2:"Col2.png",
+      col3:"Col3.png",
+
+     },
+  geometry: [
+    {name:"A", type:"Free", pos:[0,-8],color:[1,1,1]},
+    {name:"B", type:"Free", pos:[0,-8],color:[1,1,1]},
+    {name:"C", type:"Free", pos:[8.5,-8],color:[1,1,1]}
+
+  ] // End of geometry array.
+});
+
+// Remove all comments after adjusting this template for your use case.
+
+</script>
+
+
+
+<script type="text/javascript">
+
+
+  var startaudio = function () {
+
+    var audioContext = new AudioContext();
+
+
+    var BUFF_SIZE = 16384;
+
+    var audioInput = null,
+        microphone_stream = null,
+        gain_node = null,
+        script_processor_node = null,
+        script_processor_fft_node = null,
+        analyserNode = null;
+
+    if (!navigator.getUserMedia)
+            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+                          navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+    if (navigator.getUserMedia){
+
+        navigator.getUserMedia({audio:true}, 
+          function(stream) {
+              start_microphone(stream);
+          },
+          function(e) {
+            alert('Error capturing audio.');
+          }
+        );
+
+    } else { alert('getUserMedia not supported in this browser.'); }
+
+    // ---
+
+    function datatocdy(arr) {
+
+        var size_buffer = arr.length;
+        var index = 0;
+        var max_index = 2047;
+
+        s="0";
+        for (; index < max_index && index < size_buffer; index += 1) {
+            s=s+","+arr[index];
+        }
+        cdy.evokeCS('arr=['+s+']');
+    }
+
+    function process_microphone_buffer(event) {
+
+        var i, N, inp, microphone_output_buffer;
+
+        microphone_output_buffer = event.inputBuffer.getChannelData(0); // just mono - 1 channel for now
+
+        datatocdy(microphone_output_buffer);
+    }
+
+    function start_microphone(stream){
+
+      gain_node = audioContext.createGain();
+      gain_node.connect( audioContext.destination );
+
+      microphone_stream = audioContext.createMediaStreamSource(stream);
+      microphone_stream.connect(gain_node); 
+
+      script_processor_node = audioContext.createScriptProcessor(BUFF_SIZE, 1, 1);
+      script_processor_node.onaudioprocess = process_microphone_buffer;
+
+      microphone_stream.connect(script_processor_node);
+
+    
+      gain_node.gain.value = 0;
+
+      // --- setup FFT
+
+      script_processor_fft_node = audioContext.createScriptProcessor(2048, 1, 1);
+      script_processor_fft_node.connect(gain_node);
+
+      analyserNode = audioContext.createAnalyser();
+      analyserNode.smoothingTimeConstant = 0;
+      analyserNode.fftSize = 4096;
+
+      microphone_stream.connect(analyserNode);
+
+      analyserNode.connect(script_processor_fft_node);
+
+      script_processor_fft_node.onaudioprocess = function() {
+        var array = new Uint8Array(analyserNode.frequencyBinCount);
+        analyserNode.getByteFrequencyData(array);
+        if (microphone_stream.playbackState == microphone_stream.PLAYING_STATE) {
+
+            datatocdy(array);
+        }
+      };
+    }
+
+  }; 
+
+function onInitFs(fs) {
+
+
+}
+
+//window.requestFileSystem(window.TEMPORARY, 1024*1024, onInitFs, errorHandler);
+
+</script>
+
+</head>
+<body >
+  <div id="CSCanvas" ></div><br>
+  <div id="data" ></div>
+
+   
+</body>
+</html>
