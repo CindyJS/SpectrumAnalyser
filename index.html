@@ -1,7 +1,12 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Speach Test</title>
         <script type="text/javascript" src="build/js/Cindy.js"></script>
-
+        <style type="text/css">
+            * {
+                margin: 0px;
+                padding: 0px;
+            }
+        </style>
 </script>
 
 <script id="csmousedown" type="text/x-cindyscript">
@@ -238,9 +243,11 @@ col(v):=(v^2,v^3,v);
 <script type="text/javascript">
 //window.localStorage.clear();
 var cdy = CindyJS({ // See ref/createCindy documentation for details.
-  ports: [{id: "CSCanvas", width: 1250, height:700 ,
-      background: "rgb(30,30,30)",
-
+  ports: [{id: "CSCanvas",
+  virtualwidth: 1250,
+  virtuaheight: 700 ,
+  fill: "window",
+  background: "rgb(30,30,30)",
   transform: [{visibleRect: [-3, -1, 14, 8]}]}],
 
   scripts: "cs*",
@@ -382,9 +389,6 @@ function onInitFs(fs) {
 
 </head>
 <body >
-  <div id="CSCanvas" ></div><br>
-  <div id="data" ></div>
-
-   
+  <div id="CSCanvas" ></div>
 </body>
 </html>
