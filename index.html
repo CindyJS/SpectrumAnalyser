@@ -288,7 +288,6 @@ col(v):=(v^2,v^3,v);
 
     var audioInput = null,
         microphone_stream = null,
-        gain_node = null,
         analyserNode = null;
 
     var real = function(r) {
@@ -402,13 +401,7 @@ col(v):=(v^2,v^3,v);
         }
 
         function start_microphone(stream) {
-            gain_node = audioContext.createGain();
-            gain_node.connect(audioContext.destination);
-
             microphone_stream = audioContext.createMediaStreamSource(stream);
-            microphone_stream.connect(gain_node);
-
-            gain_node.gain.value = 0;
             analyserNode = audioContext.createAnalyser();
             analyserNode.smoothingTimeConstant = 0;
             analyserNode.fftSize = fftSize;
