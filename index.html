@@ -9,6 +9,7 @@
             margin: 0px;
             padding: 0px;
             font-family: sans-serif;
+            background: rgb(30,30,30);
         }
 
         #overlay {
@@ -27,6 +28,20 @@
             font-size: xx-large;
             position: absolute;
             text-align: center;
+            top: 50%;
+            left: 50%;
+            -moz-transform: translateX(-50%) translateY(-50%);
+            -webkit-transform: translateX(-50%) translateY(-50%);
+            transform: translateX(-50%) translateY(-50%);
+        }
+
+        #CSCanvas {
+            /*17:9*/
+            height: 100vh;
+            width: 188.8vh;
+            max-width: 100vw;
+            max-height: 52.94vw;
+            position: absolute;
             top: 50%;
             left: 50%;
             -moz-transform: translateX(-50%) translateY(-50%);
@@ -313,13 +328,13 @@ col(v):=(v^2,v^3,v);
     var cdy = CindyJS({ // See ref/createCindy documentation for details.
         ports: [{
             id: "CSCanvas",
-            virtualwidth: 1250,
-            virtualheight: 700,
-            fill: "window",
-            background: "rgb(30,30,30)",
+            virtualwidth: 1360,
+            virtualheight: 720,
+            //fill: "window",
+            //background: "rgb(30,30,30)",
 
             transform: [{
-                visibleRect: [-3, -1, 14, 8]
+                visibleRect: [-3, -1, 14, 8] //17:9
             }]
         }],
 
