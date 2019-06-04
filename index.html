@@ -8,14 +8,34 @@
         body {
             margin: 0px;
             padding: 0px;
+            font-family: sans-serif;
+        }
+
+        #overlay {
+            z-index: 100;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,.4,.8);
+            transition: opacity .5s linear;
+        }
+
+        #overlay > div{
+            color: white;
+            font-size: xx-large;
+            position: absolute;
+            text-align: center;
+            top: 50%;
+            left: 50%;
+            -moz-transform: translateX(-50%) translateY(-50%);
+            -webkit-transform: translateX(-50%) translateY(-50%);
+            transform: translateX(-50%) translateY(-50%);
         }
     </style>
     <script type="text/javascript" src="build/js/Cindy.js"></script>
     <script id="csmousedown" type="text/x-cindyscript">
-        if(!running,
-       javascript("startaudio()");
-       running=true;
-      );
       if(|mouse().xy,poslin|<.5,lin=true);
       if(|mouse().xy,poslog|<.5,lin=false);
       if(|mouse().xy,(-2,-.5)|<.5,advance=!advance);
@@ -68,11 +88,6 @@ apply(0..11,
 
 );
 
-/*
-    if(!running,
-   javascript("startaudio()");
-   running=true;
- );*/
   arr = readfromanalyser();
 
 fact=3;
@@ -223,7 +238,7 @@ lowestpos=lowest/11000*7;
   A.xy=(12,lowestpos);
   B.xy=(12,7);
 createimage("img",1000,1000/7*10);
-running=false;
+running=true;
 arr=zerovector(2048);;
 maxs=zerovector(2048);;
 cur=zerovector(2047);;
@@ -239,148 +254,167 @@ g(x):=x;
 col(v):=(v^2,v^3,v);
 //col(v):=hue(v+.7)*(v*.7+.3)+(1,1,1)*v^2;
 </script>
-    <script type="text/javascript">
-        //window.localStorage.clear();
-
-        var audioContext; // = new AudioContext();
-
-        var BUFF_SIZE = 16384;
-
-        var audioInput = null,
-            microphone_stream = null,
-            gain_node = null,
-            analyserNode = null;
-
-        var real = function(r) {
-            return {
-                "ctype": "number",
-                "value": {
-                    'real': r,
-                    'imag': 0
-                }
-            };
-        };
-
-        // Register a plugin called "readfromanalyser", using plugin API version 1
-        CindyJS.registerPlugin(1, "readfromanalyser", function(api) {
-
-            // Define a CindyScript function called "readfromanalyser"
-            api.defineFunction("readfromanalyser", 0, function(args, modifs) {
-                array = new Array(2048).fill(0);
-                if (analyserNode) {
-                    array = new Uint8Array(analyserNode.frequencyBinCount);
-                    analyserNode.getByteFrequencyData(array);
-                } else {
-                    console.log("analyserNode not existent yet");
-                }
-                cdylist = {
-                    "ctype": "list",
-                    "value": []
-                };
-                for (let i = 0; i < Math.min(array.length, 2048); i++) {
-                    cdylist["value"][i] = real(array[i]);
-                }
-                return cdylist;
-            });
-        });
-
-        var cdy = CindyJS({ // See ref/createCindy documentation for details.
-            ports: [{
-                id: "CSCanvas",
-                virtualwidth: 1250,
-                virtualheight: 700,
-                fill: "window",
-                background: "rgb(30,30,30)",
-
-                transform: [{
-                    visibleRect: [-3, -1, 14, 8]
-                }]
-            }],
-
-            scripts: "cs*",
-            use: ["readfromanalyser"],
-
-            animation: {
-                autoplay: true
-            },
-            defaultAppearance: {
-                // See GeoBasics.js for possible attributes.
-            },
-            images: {
-                stop: "Stop.png",
-                play: "Play.png",
-                pause: "Pause.png",
-                col1: "Col1.png",
-                col2: "Col2.png",
-                col3: "Col3.png",
-
-            },
-            geometry: [{
-                    name: "A",
-                    type: "Free",
-                    pos: [0, -8],
-                    color: [1, 1, 1]
-                },
-                {
-                    name: "B",
-                    type: "Free",
-                    pos: [0, -8],
-                    color: [1, 1, 1]
-                },
-                {
-                    name: "C",
-                    type: "Free",
-                    pos: [8.5, -8],
-                    color: [1, 1, 1]
-                }
-
-            ] // End of geometry array.
-        });
-
-        var startaudio = function() {
-            if (!window.AudioContext && !window.webkitAudioContext) {
-                console.warn('Web Audio API not supported in this browser');
-            } else {
-                //this.audioCtx = new window.AudioContext() || new window.webkitAudioContext();
-                let a = window.AudioContext || window.webkitAudioContext;
-                audioContext = new a();
-            }
-
-            if (navigator.mediaDevices) {
-                navigator.mediaDevices.getUserMedia({
-                        audio: true
-                    })
-                    .then(function(stream) {
-                        start_microphone(stream);
-                    })
-                    .catch(function(err) {
-                        alert(err.name + ": " + err.message);
-                    }); // always check for errors at the end.
-            } else {
-                alert("Browser not supported");
-            }
-
-            function start_microphone(stream) {
-                gain_node = audioContext.createGain();
-                gain_node.connect(audioContext.destination);
-
-                microphone_stream = audioContext.createMediaStreamSource(stream);
-                microphone_stream.connect(gain_node);
-
-                gain_node.gain.value = 0;
-                analyserNode = audioContext.createAnalyser();
-                analyserNode.smoothingTimeConstant = 0;
-                analyserNode.fftSize = 4096;
-
-                microphone_stream.connect(analyserNode);
-            }
-        };
-
-    </script>
 </head>
 
 <body>
     <div id="CSCanvas"></div>
+    <div id="overlay">
+      <div>
+        <div>The following applet accesses the microphone.</div>
+        <div>Click to start interaction.</div>
+      <div>
+    </div>
 </body>
+<script type="text/javascript">
+    //window.localStorage.clear();
+
+    var audioContext; // = new AudioContext();
+
+    var BUFF_SIZE = 16384;
+
+    var audioInput = null,
+        microphone_stream = null,
+        gain_node = null,
+        analyserNode = null;
+
+    var real = function(r) {
+        return {
+            "ctype": "number",
+            "value": {
+                'real': r,
+                'imag': 0
+            }
+        };
+    };
+
+    // Register a plugin called "readfromanalyser", using plugin API version 1
+    CindyJS.registerPlugin(1, "readfromanalyser", function(api) {
+
+        // Define a CindyScript function called "readfromanalyser"
+        api.defineFunction("readfromanalyser", 0, function(args, modifs) {
+            array = new Array(2048).fill(0);
+            if (analyserNode) {
+                array = new Uint8Array(analyserNode.frequencyBinCount);
+                analyserNode.getByteFrequencyData(array);
+            } else {
+                console.log("analyserNode not existent yet");
+            }
+            cdylist = {
+                "ctype": "list",
+                "value": []
+            };
+            for (let i = 0; i < Math.min(array.length, 2048); i++) {
+                cdylist["value"][i] = real(array[i]);
+            }
+            return cdylist;
+        });
+    });
+
+    var cdy = CindyJS({ // See ref/createCindy documentation for details.
+        ports: [{
+            id: "CSCanvas",
+            virtualwidth: 1250,
+            virtualheight: 700,
+            fill: "window",
+            background: "rgb(30,30,30)",
+
+            transform: [{
+                visibleRect: [-3, -1, 14, 8]
+            }]
+        }],
+
+        scripts: "cs*",
+        use: ["readfromanalyser"],
+
+        animation: {
+            autoplay: true
+        },
+        defaultAppearance: {
+            // See GeoBasics.js for possible attributes.
+        },
+        images: {
+            stop: "Stop.png",
+            play: "Play.png",
+            pause: "Pause.png",
+            col1: "Col1.png",
+            col2: "Col2.png",
+            col3: "Col3.png",
+
+        },
+        geometry: [{
+                name: "A",
+                type: "Free",
+                pos: [0, -8],
+                color: [1, 1, 1]
+            },
+            {
+                name: "B",
+                type: "Free",
+                pos: [0, -8],
+                color: [1, 1, 1]
+            },
+            {
+                name: "C",
+                type: "Free",
+                pos: [8.5, -8],
+                color: [1, 1, 1]
+            }
+
+        ] // End of geometry array.
+    });
+    cdy.pause();
+
+    var startaudio = function() {
+        if (!window.AudioContext && !window.webkitAudioContext) {
+            console.warn('Web Audio API not supported in this browser');
+        } else {
+            //this.audioCtx = new window.AudioContext() || new window.webkitAudioContext();
+            let a = window.AudioContext || window.webkitAudioContext;
+            audioContext = new a();
+        }
+
+        if (navigator.mediaDevices) {
+            navigator.mediaDevices.getUserMedia({
+                    audio: true
+                })
+                .then(function(stream) {
+                    start_microphone(stream);
+                })
+                .catch(function(err) {
+                    alert(err.name + ": " + err.message);
+                }); // always check for errors at the end.
+        } else {
+            alert("Browser not supported");
+        }
+
+        function start_microphone(stream) {
+            gain_node = audioContext.createGain();
+            gain_node.connect(audioContext.destination);
+
+            microphone_stream = audioContext.createMediaStreamSource(stream);
+            microphone_stream.connect(gain_node);
+
+            gain_node.gain.value = 0;
+            analyserNode = audioContext.createAnalyser();
+            analyserNode.smoothingTimeConstant = 0;
+            analyserNode.fftSize = 4096;
+
+            microphone_stream.connect(analyserNode);
+        }
+    };
+
+    let overlay = document.getElementById("overlay");
+
+    overlay.addEventListener("click", function(){
+
+      overlay.style.opacity = 0;
+      window.setTimeout(function(){
+        overlay.style.visibility = 'hidden';
+      }, 500);
+      startaudio();
+      cdy.play();
+    });
+
+</script>
 
 </html>
