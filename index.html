@@ -49,6 +49,7 @@
             transform: translateX(-50%) translateY(-50%);
         }
     </style>
+    <script type="text/javascript" src="config.js"></script>
     <script type="text/javascript" src="build/js/Cindy.js"></script>
     <script id="csmousedown" type="text/x-cindyscript">
       if(|mouse().xy,poslin|<.5,lin=true);
@@ -285,8 +286,6 @@ col(v):=(v^2,v^3,v);
 
     var audioContext; // = new AudioContext();
 
-    var BUFF_SIZE = 16384;
-
     var audioInput = null,
         microphone_stream = null,
         gain_node = null,
@@ -412,7 +411,7 @@ col(v):=(v^2,v^3,v);
             gain_node.gain.value = 0;
             analyserNode = audioContext.createAnalyser();
             analyserNode.smoothingTimeConstant = 0;
-            analyserNode.fftSize = 4096;
+            analyserNode.fftSize = fftSize;
 
             microphone_stream.connect(analyserNode);
         }
@@ -421,7 +420,6 @@ col(v):=(v^2,v^3,v);
     let overlay = document.getElementById("overlay");
 
     overlay.addEventListener("click", function(){
-
       overlay.style.opacity = 0;
       window.setTimeout(function(){
         overlay.style.visibility = 'hidden';
@@ -429,6 +427,12 @@ col(v):=(v^2,v^3,v);
       startaudio();
       cdy.play();
     });
+
+    if(autostart) {
+      overlay.style.visibility = 'hidden';
+      startaudio();
+      cdy.play();
+    }
 
 </script>
 
