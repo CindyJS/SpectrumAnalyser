@@ -1,33 +1,31 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Speach Test</title>
-        <script type="text/javascript" src="build/js/Cindy.js"></script>
-        <style type="text/css">
-            * {
-                margin: 0px;
-                padding: 0px;
-            }
-        </style>
-</script>
 
-<script id="csmousedown" type="text/x-cindyscript">
-  if(!running,
-   javascript("startaudio()");
-   running=true;
-  );
-  if(|mouse().xy,poslin|<.5,lin=true);
-  if(|mouse().xy,poslog|<.5,lin=false);
-  if(|mouse().xy,(-2,-.5)|<.5,advance=!advance);
-  if(|mouse().xy,posc1|<.5,selco=1);
-  if(|mouse().xy,posc2|<.5,selco=2);
-  if(|mouse().xy,posc3|<.5,selco=3);
+<html>
 
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>SpectrumAnalyser</title>
+    <style type="text/css">
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+    </style>
+    <script type="text/javascript" src="build/js/Cindy.js"></script>
+    <script id="csmousedown" type="text/x-cindyscript">
+        if(!running,
+       javascript("startaudio()");
+       running=true;
+      );
+      if(|mouse().xy,poslin|<.5,lin=true);
+      if(|mouse().xy,poslog|<.5,lin=false);
+      if(|mouse().xy,(-2,-.5)|<.5,advance=!advance);
+      if(|mouse().xy,posc1|<.5,selco=1);
+      if(|mouse().xy,posc2|<.5,selco=2);
+      if(|mouse().xy,posc3|<.5,selco=3);
+    </script>
+    <script id="csdraw" type="text/x-cindyscript">
 
-
-</script>
-
-<script id="csdraw" type="text/x-cindyscript">
-
-if(selco==1,col(v):=(v,v^2,v^3));
+        if(selco==1,col(v):=(v,v^2,v^3));
 if(selco==2,col(v):=(v^2,v^3,v));
 if(selco==3,col(v):=hue(v+.7)*(v*.7+.3)+(1,1,1)*v^2);
 
@@ -70,11 +68,12 @@ apply(0..11,
 
 );
 
-
+/*
     if(!running,
    javascript("startaudio()");
    running=true;
-  );
+ );*/
+  arr = readfromanalyser();
 
 fact=3;
   nn=512;
@@ -207,8 +206,8 @@ drawpoly([posc3+(-.3,-.3),posc3+(+.3,-.3),posc3+(.3,.3),posc3+(-.3,.3)],color->(
 </script>
 
 
-<script id="csinit" type="text/x-cindyscript">
-  advance=true;
+    <script id="csinit" type="text/x-cindyscript">
+        advance=true;
   poslog=(11.5,-.5);
   poslin=(10.5,-.5);
   posc1=(-2,7.5);
@@ -240,155 +239,148 @@ g(x):=x;
 col(v):=(v^2,v^3,v);
 //col(v):=hue(v+.7)*(v*.7+.3)+(1,1,1)*v^2;
 </script>
-<script type="text/javascript">
-//window.localStorage.clear();
-var cdy = CindyJS({ // See ref/createCindy documentation for details.
-  ports: [{id: "CSCanvas",
-  virtualwidth: 1250,
-  virtuaheight: 700 ,
-  fill: "window",
-  background: "rgb(30,30,30)",
-  transform: [{visibleRect: [-3, -1, 14, 8]}]}],
+    <script type="text/javascript">
+        //window.localStorage.clear();
 
-  scripts: "cs*",
- 
-  animation: {autoplay: true},
-  defaultAppearance: {
-    // See GeoBasics.js for possible attributes.
-  },
- images: {
-      stop:"Stop.png",
-      play:"Play.png",
-      pause:"Pause.png",
-      col1:"Col1.png",
-      col2:"Col2.png",
-      col3:"Col3.png",
+        var audioContext; // = new AudioContext();
 
-     },
-  geometry: [
-    {name:"A", type:"Free", pos:[0,-8],color:[1,1,1]},
-    {name:"B", type:"Free", pos:[0,-8],color:[1,1,1]},
-    {name:"C", type:"Free", pos:[8.5,-8],color:[1,1,1]}
+        var BUFF_SIZE = 16384;
 
-  ] // End of geometry array.
-});
+        var audioInput = null,
+            microphone_stream = null,
+            gain_node = null,
+            analyserNode = null;
 
-// Remove all comments after adjusting this template for your use case.
+        var real = function(r) {
+            return {
+                "ctype": "number",
+                "value": {
+                    'real': r,
+                    'imag': 0
+                }
+            };
+        };
 
-</script>
+        // Register a plugin called "readfromanalyser", using plugin API version 1
+        CindyJS.registerPlugin(1, "readfromanalyser", function(api) {
 
+            // Define a CindyScript function called "readfromanalyser"
+            api.defineFunction("readfromanalyser", 0, function(args, modifs) {
+                array = new Array(2048).fill(0);
+                if (analyserNode) {
+                    array = new Uint8Array(analyserNode.frequencyBinCount);
+                    analyserNode.getByteFrequencyData(array);
+                } else {
+                    console.log("analyserNode not existent yet");
+                }
+                cdylist = {
+                    "ctype": "list",
+                    "value": []
+                };
+                for (let i = 0; i < Math.min(array.length, 2048); i++) {
+                    cdylist["value"][i] = real(array[i]);
+                }
+                return cdylist;
+            });
+        });
 
+        var cdy = CindyJS({ // See ref/createCindy documentation for details.
+            ports: [{
+                id: "CSCanvas",
+                virtualwidth: 1250,
+                virtualheight: 700,
+                fill: "window",
+                background: "rgb(30,30,30)",
 
-<script type="text/javascript">
+                transform: [{
+                    visibleRect: [-3, -1, 14, 8]
+                }]
+            }],
 
+            scripts: "cs*",
+            use: ["readfromanalyser"],
 
-  var startaudio = function () {
+            animation: {
+                autoplay: true
+            },
+            defaultAppearance: {
+                // See GeoBasics.js for possible attributes.
+            },
+            images: {
+                stop: "Stop.png",
+                play: "Play.png",
+                pause: "Pause.png",
+                col1: "Col1.png",
+                col2: "Col2.png",
+                col3: "Col3.png",
 
-    var audioContext = new AudioContext();
+            },
+            geometry: [{
+                    name: "A",
+                    type: "Free",
+                    pos: [0, -8],
+                    color: [1, 1, 1]
+                },
+                {
+                    name: "B",
+                    type: "Free",
+                    pos: [0, -8],
+                    color: [1, 1, 1]
+                },
+                {
+                    name: "C",
+                    type: "Free",
+                    pos: [8.5, -8],
+                    color: [1, 1, 1]
+                }
 
+            ] // End of geometry array.
+        });
 
-    var BUFF_SIZE = 16384;
+        var startaudio = function() {
+            if (!window.AudioContext && !window.webkitAudioContext) {
+                console.warn('Web Audio API not supported in this browser');
+            } else {
+                //this.audioCtx = new window.AudioContext() || new window.webkitAudioContext();
+                let a = window.AudioContext || window.webkitAudioContext;
+                audioContext = new a();
+            }
 
-    var audioInput = null,
-        microphone_stream = null,
-        gain_node = null,
-        script_processor_node = null,
-        script_processor_fft_node = null,
-        analyserNode = null;
+            if (navigator.mediaDevices) {
+                navigator.mediaDevices.getUserMedia({
+                        audio: true
+                    })
+                    .then(function(stream) {
+                        start_microphone(stream);
+                    })
+                    .catch(function(err) {
+                        alert(err.name + ": " + err.message);
+                    }); // always check for errors at the end.
+            } else {
+                alert("Browser not supported");
+            }
 
-    if (!navigator.getUserMedia)
-            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
-                          navigator.mozGetUserMedia || navigator.msGetUserMedia;
+            function start_microphone(stream) {
+                gain_node = audioContext.createGain();
+                gain_node.connect(audioContext.destination);
 
-    if (navigator.getUserMedia){
+                microphone_stream = audioContext.createMediaStreamSource(stream);
+                microphone_stream.connect(gain_node);
 
-        navigator.getUserMedia({audio:true}, 
-          function(stream) {
-              start_microphone(stream);
-          },
-          function(e) {
-            alert('Error capturing audio.');
-          }
-        );
+                gain_node.gain.value = 0;
+                analyserNode = audioContext.createAnalyser();
+                analyserNode.smoothingTimeConstant = 0;
+                analyserNode.fftSize = 4096;
 
-    } else { alert('getUserMedia not supported in this browser.'); }
+                microphone_stream.connect(analyserNode);
+            }
+        };
 
-    // ---
-
-    function datatocdy(arr) {
-
-        var size_buffer = arr.length;
-        var index = 0;
-        var max_index = 2047;
-
-        s="0";
-        for (; index < max_index && index < size_buffer; index += 1) {
-            s=s+","+arr[index];
-        }
-        cdy.evokeCS('arr=['+s+']');
-    }
-
-    function process_microphone_buffer(event) {
-
-        var i, N, inp, microphone_output_buffer;
-
-        microphone_output_buffer = event.inputBuffer.getChannelData(0); // just mono - 1 channel for now
-
-        datatocdy(microphone_output_buffer);
-    }
-
-    function start_microphone(stream){
-
-      gain_node = audioContext.createGain();
-      gain_node.connect( audioContext.destination );
-
-      microphone_stream = audioContext.createMediaStreamSource(stream);
-      microphone_stream.connect(gain_node); 
-
-      script_processor_node = audioContext.createScriptProcessor(BUFF_SIZE, 1, 1);
-      script_processor_node.onaudioprocess = process_microphone_buffer;
-
-      microphone_stream.connect(script_processor_node);
-
-    
-      gain_node.gain.value = 0;
-
-      // --- setup FFT
-
-      script_processor_fft_node = audioContext.createScriptProcessor(2048, 1, 1);
-      script_processor_fft_node.connect(gain_node);
-
-      analyserNode = audioContext.createAnalyser();
-      analyserNode.smoothingTimeConstant = 0;
-      analyserNode.fftSize = 4096;
-
-      microphone_stream.connect(analyserNode);
-
-      analyserNode.connect(script_processor_fft_node);
-
-      script_processor_fft_node.onaudioprocess = function() {
-        var array = new Uint8Array(analyserNode.frequencyBinCount);
-        analyserNode.getByteFrequencyData(array);
-        if (microphone_stream.playbackState == microphone_stream.PLAYING_STATE) {
-
-            datatocdy(array);
-        }
-      };
-    }
-
-  }; 
-
-function onInitFs(fs) {
-
-
-}
-
-//window.requestFileSystem(window.TEMPORARY, 1024*1024, onInitFs, errorHandler);
-
-</script>
-
+    </script>
 </head>
-<body >
-  <div id="CSCanvas" ></div>
+
+<body>
+    <div id="CSCanvas"></div>
 </body>
+
 </html>
