@@ -9,7 +9,7 @@ It is based on the [CindyJS](https://cindyjs.org)-framework.
 
 Just download everything and put in on a webserver and open `index.html`.
 
-An [online version](https://raw.githack.com/CindyJS/SpectrumAnalyser/master/index.html) of this repository is served through githack.com.  Another version of this widget can be found on [science-to-touch.com](http://science-to-touch.com/LaLaLab/SpectrumAnalyser/).
+An [online version](https://raw.githack.com/CindyJS/SpectrumAnalyser/master/index.html) of this repository is served through githack.com.
 
 For exhibits, it is recommended to use the [kiosk-browser](https://github.com/IMAGINARY/kiosk-browser) and [xbanish-hide](https://github.com/IMAGINARY/xbanish-hide) on a minified desktop environment such as [Openbox](http://openbox.org/wiki/Main_Page).
 
@@ -17,7 +17,7 @@ For exhibits, it is recommended to use the [kiosk-browser](https://github.com/IM
 ## Configuration
 
 The applet requires a click before the CindyJS widget starts. On most browsers this is required before access to the the microphone is granted.
-This behavior can be switched of by adding the option `autostart=false` to the URL, i.e. opening the URL `index.html?autostart=false`.
+This behavior can be switched of by adding `?autostart=false` to the URL, i.e. opening the URL `index.html?autostart=false`.
 
 ## Author & License
 Created by [Jürgen Richter-Gebert](https://geo.ma.tum.de/en/people/juergen-richter-gebert.html).
